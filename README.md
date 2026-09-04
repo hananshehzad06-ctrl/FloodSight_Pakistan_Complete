@@ -1,4 +1,9 @@
-# FloodSight Pakistan
+# AI-Powered Satellite Imagery Analysis for Flood Damage Assessment
+### Product Name: FloodSight Pakistan
+
+> **Official Submission Title**: *AI-Powered Satellite Imagery Analysis for Flood Damage Assessment*  
+> **Project Brand**: FloodSight Pakistan  
+> **Track**: Alibaba Cloud AI Hackathon Pakistan 2026 (Open Innovation Track)
 
 Offline-first flood response platform for Pakistan's **Rescue 1122**, NDMA/PDMA command centres, and field units.
 
