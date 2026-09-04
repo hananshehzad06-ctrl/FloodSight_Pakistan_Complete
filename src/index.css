@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media print {
+	tr,
+	.metric-card,
+	.table-row {
+		break-inside: avoid !important;
+		page-break-inside: avoid !important;
+	}
+
+	.no-print {
+		display: none !important;
+	}
+
+	header.sticky {
+		position: static !important;
+	}
+}

@@ -1,0 +1,91 @@
+# SandBox Execution Client 配置文件示例
+
+# 服务器配置
+server:
+  # WebSocket服务器地址
+  endpoint: "ws://localhost:8080/ws"
+
+# 工作空间配置
+workspace:
+  # 工作目录路径（默认为当前目录）
+  work_dir: "./workspace"
+  # 工具目录名称
+  tools_dir: "tools"
+  # 插件目录名称
+  plugins_dir: "plugins"
+
+# HTTP服务配置
+http:
+  # HTTP服务端口
+  port: 9002
+
+# git配置
+git:
+  git_username: ""
+  git_access_token: ""
+
+# 心跳配置
+heartbeat:
+  # 心跳间隔（秒）
+  interval: 10
+  # 最大丢失次数
+  max_miss_count: 3
+  # 重试间隔（秒）
+  retry_interval: 5
+  # 最大重试次数
+  max_retry_count: 5
+
+# 工具配置
+tools:
+  # 基础文件处理工具
+  file_process:
+    # 是否启用
+    enabled: true
+  golangci_lint:
+    enabled: true
+  ruff:
+    enabled: true
+  detekt:
+    enabled: false
+  pmd:
+    enabled: false
+  biome:
+    enabled: true
+  eslint:
+    enabled: true
+  gitleaks:
+    enabled: true
+  yamllint:
+    enabled: true
+  sqlfluff:
+    enabled: false
+  shellcheck:
+    enabled: true
+# 插件配置
+plugins:
+  # Jupyter插件
+  jupyter:
+    # 是否启用
+    enabled: true
+    # Gateway认证Token（可选）
+    gateway_token: ""
+  fileops:
+    # 是否启用
+    enabled: true
+  maven:
+    # 是否启用
+    enabled: true
+  tmux:
+    # 是否启用
+    enabled: true
+  sonarqube:
+    # 是否启用
+    enabled: true
+    # SonarQube地址
+    base_url: "http://127.0.0.1:9000"
+    # SonarQube认证Token
+    token: ""
+    # SonarQube认证Account
+    account: "admin"
+    # SonarQube认证Password
+    password: "admin"
