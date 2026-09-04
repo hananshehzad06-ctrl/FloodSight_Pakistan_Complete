@@ -169,6 +169,20 @@ function MapNavigationController({ actionRef }) {
   return null;
 }
 
+function MapResizer() {
+  const map = useMap();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [map]);
+
+  return null;
+}
+
 /* ------------------------------------------------------------------ */
 /*  WATER DEPTH METER                                                  */
 /* ------------------------------------------------------------------ */
@@ -622,7 +636,7 @@ export default function RescueFieldPWA() {
       </div>
 
       {/* Map */}
-      <div className="relative flex-1">
+      <div className="w-full h-[calc(100vh-140px)] min-h-[500px] relative">
         <MapContainer
           center={defaultCenter}
           zoom={12}
@@ -630,6 +644,7 @@ export default function RescueFieldPWA() {
           className="h-full w-full"
           style={{ background: '#0f172a' }}
         >
+          <MapResizer />
           <MapNavigationController actionRef={mapActionRef} />
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
