@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media print {
+	tr,
+	.metric-card,
+	.table-row {
+		break-inside: avoid !important;
+		page-break-inside: avoid !important;
+	}
+
+	.no-print {
+		display: none !important;
+	}
+
+	header.sticky {
+		position: static !important;
+	}
+}
+
+/* ============================================================
+	 NDMA SITREP PRINT LAYOUT
+	 Screen: .print-only is hidden.
+	 Print: .no-print is hidden; the page becomes a clean white document.
+	 ============================================================ */
+.print-only { display: none; }
+
+@page {
+	size: A4 portrait;
+	margin: 14mm 12mm 16mm 12mm;
+}
+
+@media print {
+	* {
+		-webkit-print-color-adjust: exact !important;
+		print-color-adjust: exact !important;
+	}
+  
+	html, body, #root {
+		background: #ffffff !important;
+		color: #0f172a !important;
+		font-family: "Times New Roman", Georgia, serif;
+		font-size: 10.5pt;
+		line-height: 1.35;
+	}
+  
+	.no-print,
+	.leaflet-container,
+	.leaflet-control-container,
+	.leaflet-tile-pane,
+	button,
+	[role="radiogroup"] {
+		display: none !important;
+	}
+  
+	.print-only { display: block !important; }
+  
+	.print-root {
+		background: #fff !important;
+		color: #0f172a !important;
+		min-height: 0 !important;
+		height: auto !important;
+		overflow: visible !important;
+	}
+  
+	.print-root * {
+		color: #0f172a !important;
+		background: transparent !important;
+		box-shadow: none !important;
+		text-shadow: none !important;
+		border-color: #94a3b8 !important;
+	}
+  
+	.sitrep-letterhead {
+		border-bottom: 2.5pt solid #0f172a;
+		padding-bottom: 6pt;
+		margin-bottom: 10pt;
+		text-align: center;
+	}
+  
+	.sitrep-letterhead .org { font-size: 11pt; letter-spacing: 0.12em; font-weight: 700; }
+	.sitrep-letterhead .title { font-size: 16pt; font-weight: 700; margin: 2pt 0; text-transform: uppercase; }
+  
+	.sitrep-meta {
+		display: flex; justify-content: space-between;
+		font-family: "Courier New", monospace; font-size: 9pt; margin-top: 6pt;
+	}
+  
+	.sitrep-h2 {
+		font-size: 11pt; font-weight: 700; text-transform: uppercase;
+		border-bottom: 1pt solid #0f172a; margin: 12pt 0 6pt; padding-bottom: 2pt;
+		break-after: avoid;
+	}
+  
+	.sitrep-metrics {
+		display: grid !important;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 0;
+		border: 1pt solid #0f172a;
+	}
+  
+	.sitrep-metric {
+		padding: 6pt 8pt;
+		border: 0.5pt solid #94a3b8;
+		break-inside: avoid;
+	}
+  
+	.sitrep-metric .label { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.06em; }
+	.sitrep-metric .value { font-family: "Courier New", monospace; font-size: 15pt; font-weight: 700; }
+  
+	table.sitrep-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+	.sitrep-table th {
+		background: #e2e8f0 !important;
+		border: 0.75pt solid #0f172a !important;
+		padding: 3pt 5pt; text-align: left; text-transform: uppercase; font-size: 8pt;
+	}
+	.sitrep-table td {
+		border: 0.5pt solid #94a3b8 !important;
+		padding: 3pt 5pt;
+	}
+	.sitrep-table thead { display: table-header-group; }
+	.sitrep-table tr { break-inside: avoid; page-break-inside: avoid; }
+	.sitrep-table .mono { font-family: "Courier New", monospace; }
+  
+	.lvl-badge {
+		display: inline-block; border: 1pt solid #0f172a !important;
+		padding: 0 4pt; font-weight: 700; font-family: "Courier New", monospace;
+	}
+	.lvl-badge[data-lvl="4"], .lvl-badge[data-lvl="5"] {
+		background: #0f172a !important; color: #fff !important;
+	}
+  
+	.sitrep-footer {
+		margin-top: 14pt; padding-top: 6pt; border-top: 1pt solid #0f172a;
+		font-size: 8pt; display: flex; justify-content: space-between;
+	}
+}
