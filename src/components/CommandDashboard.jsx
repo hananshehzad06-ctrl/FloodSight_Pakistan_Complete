@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from "react";
+import {
+  CircleMarker,
+  MapContainer,
+  TileLayer,
+  Tooltip,
+} from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import {
   BarChart3,
   Users,
@@ -9,26 +16,11 @@ import {
   ChevronRight,
   Printer,
 } from "lucide-react";
-import {
-  MOCK_UNION_COUNCILS,
-  MOCK_SITREP_DATA,
-  totalBoats,
-} from "../data/mockData.js";
+import { floodAssessmentData } from "../data/floodAssessmentData.js";
 
 /* ------------------------------------------------------------------ */
 /*  Hazard-level fallback                                              */
 /* ------------------------------------------------------------------ */
-
-function deriveHazardLevel(uc) {
-  if (uc.hz_lvl != null) return uc.hz_lvl;
-  if (uc.level != null) return Number.parseInt(uc.level.replace("LVL ", ""), 10);
-  const pct = uc.inundated_pct ?? 0;
-  if (pct >= 80) return 5;
-  if (pct >= 60) return 4;
-  if (pct >= 35) return 3;
-  if (pct >= 15) return 2;
-  return 1;
-}
 
 /* ------------------------------------------------------------------ */
 /*  Badge component                                                    */
@@ -86,21 +78,23 @@ function MetricCard({ icon: Icon, label, value, accent }) {
 
 export default function CommandDashboard({ onGenerateSitRep }) {
   const [hoveredRow, setHoveredRow] = useState(null);
+  const [selectedDistrict, setSelectedDistrict] = useState("Badin");
+  const currentDistrict =
+    floodAssessmentData[selectedDistrict] || floodAssessmentData.Badin;
+  const currentMetrics = currentDistrict.metrics;
+  const currentUCs = currentDistrict.unionCouncils;
 
   /* Enrich + sort ---------------------------------------------------- */
-  const ranked = useMemo(() => {
-    return [...MOCK_UNION_COUNCILS]
-      .map((uc) => ({
-        ...uc,
-        uc_id: uc.id,
-        uc_name: uc.name,
-        _level: deriveHazardLevel(uc),
-      }))
-      .sort((a, b) => b._level - a._level || b.hazards - a.hazards);
-  }, []);
+  const ranked = currentUCs.map((uc) => ({
+    ...uc,
+    uc_id: uc.name,
+    uc_name: uc.name,
+    _level: Number.parseInt(uc.risk.replace("LVL ", ""), 10),
+  }));
 
   /* Aggregates ------------------------------------------------------ */
-  const totalHazards = MOCK_UNION_COUNCILS.reduce((total, uc) => total + uc.hazards, 0);
+  const totalHazards = currentUCs.reduce((total, uc) => total + uc.hazards, 0);
+  const totalBoats = currentUCs.reduce((total, uc) => total + uc.boats, 0);
 
   const handleSitRep = () => {
     if (typeof onGenerateSitRep === "function") {
@@ -124,7 +118,7 @@ export default function CommandDashboard({ onGenerateSitRep }) {
               NDMA / PDMA Macro Command
             </h1>
             <p className="text-[11px] text-slate-500 font-medium tabular-nums">
-              FloodSight Pakistan &middot; SitRep {MOCK_SITREP_DATA.last_updated}
+              FloodSight Pakistan &middot; {selectedDistrict} district assessment
             </p>
           </div>
         </div>
@@ -136,32 +130,87 @@ export default function CommandDashboard({ onGenerateSitRep }) {
 
       {/* ── Content ───────────────────────────────────────────────── */}
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 space-y-8 max-w-6xl mx-auto w-full">
+        <nav
+          aria-label="Flood hotspots"
+          className="flex flex-wrap items-center gap-2"
+        >
+          <span className="mr-1 text-xs font-bold uppercase tracking-wider text-slate-500">
+            Hotspots
+          </span>
+          {Object.keys(floodAssessmentData).map((district) => (
+            <button
+              key={district}
+              type="button"
+              onClick={() => setSelectedDistrict(district)}
+              aria-pressed={selectedDistrict === district}
+              className={`rounded-md border px-3 py-2 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+                selectedDistrict === district
+                  ? "border-cyan-400 bg-cyan-500/20 text-cyan-200"
+                  : "border-slate-700 bg-slate-900 text-slate-300 hover:border-cyan-500/60"
+              }`}
+            >
+              {district}
+            </button>
+          ))}
+        </nav>
+
         {/* Metric cards --------------------------------------------- */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
             icon={BarChart3}
             label="Inundated Area"
-            value={`${MOCK_SITREP_DATA.inundated_sq_km}\u00a0km\u00b2`}
+            value={currentMetrics.inundatedArea}
             accent="text-cyan-400"
           />
           <MetricCard
             icon={Users}
             label="Displaced Population"
-            value={MOCK_SITREP_DATA.displaced_pop.toLocaleString()}
+            value={currentMetrics.displacedPopulation}
             accent="text-amber-400"
           />
           <MetricCard
             icon={Ship}
             label="Active Rescue Boats"
-            value={MOCK_SITREP_DATA.active_boats}
+            value={currentMetrics.activeBoats}
             accent="text-emerald-400"
           />
           <MetricCard
             icon={Tent}
             label="Relief Camps Needed"
-            value={MOCK_SITREP_DATA.relief_camps_needed}
+            value={currentMetrics.campsNeeded}
             accent="text-red-400"
           />
+        </section>
+
+        <section
+          aria-label={`${selectedDistrict} hotspot map`}
+          className="h-[360px] overflow-hidden rounded-xl border border-slate-800"
+        >
+          <MapContainer
+            key={selectedDistrict}
+            center={currentDistrict.center}
+            zoom={currentDistrict.zoom}
+            className="h-full w-full bg-slate-950"
+          >
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+              attribution='Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+            />
+            {Object.entries(floodAssessmentData).map(([district, entry]) => (
+              <CircleMarker
+                key={district}
+                center={entry.center}
+                radius={district === selectedDistrict ? 11 : 7}
+                pathOptions={{
+                  color: "#22d3ee",
+                  fillOpacity: district === selectedDistrict ? 0.8 : 0.45,
+                }}
+                eventHandlers={{ click: () => setSelectedDistrict(district) }}
+              >
+                <Tooltip>{district}</Tooltip>
+              </CircleMarker>
+            ))}
+          </MapContainer>
         </section>
 
         {/* Priority Risk Ranking ------------------------------------ */}
@@ -244,10 +293,9 @@ export default function CommandDashboard({ onGenerateSitRep }) {
               Generate Consolidated SitRep
             </h3>
             <p className="text-xs text-slate-500 mt-1 max-w-md">
-              Export the full situation report covering all {ranked.length}{" "}
-              Union Councils, {totalHazards} active hazards, and{" "}
-              {MOCK_SITREP_DATA.displaced_pop.toLocaleString()} displaced
-              persons for NDMA/PDMA briefing.
+              Export the {selectedDistrict} situation report covering{" "}
+              {ranked.length} Union Councils, {totalHazards} active hazards,
+              and {currentMetrics.displacedPopulation} displaced persons.
             </p>
           </div>
           <button
@@ -263,7 +311,7 @@ export default function CommandDashboard({ onGenerateSitRep }) {
       {/* ── Footer ────────────────────────────────────────────────── */}
       <footer className="border-t border-slate-800 px-5 py-3 text-[11px] text-slate-600 tabular-nums text-center">
         FloodSight Pakistan &middot; NDMA/PDMA Command Console &middot;{" "}
-        {MOCK_SITREP_DATA.last_updated}
+        {selectedDistrict}
       </footer>
     </div>
   );
